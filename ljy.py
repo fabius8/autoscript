@@ -19,6 +19,23 @@ for i in range(0, number):
     time.sleep(1)
 # TEST END
 
+def imageChange(region):
+    im1 = pyautogui.screenshot(region=region)
+    histogram1 = im1.histogram()
+    time.sleep(2)
+    im2 = pyautogui.screenshot(region=region)
+    histogram2 = im2.histogram()
+    differ = math.sqrt(reduce(operator.add, list(map(lambda a, b: (a-b)**2, histogram1, histogram2)))/len(histogram1))
+    print(differ)
+    if differ < 20:
+        print("image no change!")
+        return False
+    else:
+        print("image change")
+        time.sleep(interval)
+        return True
+
+
 while True:
     print("start")
     pyautogui.moveTo(init_x, init_y, duration=1)
@@ -26,12 +43,16 @@ while True:
     time.sleep(1)
     pyautogui.click()
     print("0")
-    time.sleep(interval)
+    while True:
+        if imageChange((region[0], region[1] + 2 * space, region[2] + 250, region[3])) is False:
+            break
 
     for i in range(1, number):
         pyautogui.click(init_x, init_y + i * space)
         print(i)
-        time.sleep(interval)
+        while True:
+            if imageChange((region[0], region[1] + 2 * space, region[2] + 250, region[3])) is False:
+                break
 
         if i == (number - 1):
             while True:
@@ -40,7 +61,7 @@ while True:
                 histogram1 = im1.histogram()
                 x, y = pyautogui.position()
                 pyautogui.dragTo(x, y - space, 1, button='left')
-                pyautogui.moveTo(x, y)
+                pyautogui.moveTo(x, y, duration=1)
                 time.sleep(1)
                 # get new pic, compare
                 im2 = pyautogui.screenshot(region=region)
@@ -50,9 +71,10 @@ while True:
 
                 if differ < 50:
                     print("match")
-                    pyautogui.scroll(200 * space)
-                    time.sleep(1)
                     break
                 else:
                     print("not match")
                     pyautogui.click()
+                    while True:
+                        if imageChange((region[0], region[1] + 2 * space, region[2] + 250, region[3])) is False:
+                            break
